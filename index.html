@@ -26,7 +26,11 @@
     );
 
     async function loadData() {
-      const { data } = await supabase.from('video_clicks').select('*');
+      const { data, error } = await supabase
+        .from('video_clicks')
+        .select('*');
+      console.log("DATA:", data);
+      console.log("ERROR:", error);
 
       document.getElementById('total').innerText = data.length;
 
