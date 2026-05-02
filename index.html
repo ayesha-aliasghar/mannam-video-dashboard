@@ -10,9 +10,10 @@
       .select("*");
 
     if (error) {
-      console.error(error);
-      return;
-    }
+  console.error("Supabase Error:", error);
+  alert(JSON.stringify(error));
+  return;
+}
 
     document.getElementById("total").innerText = data.length;
 
