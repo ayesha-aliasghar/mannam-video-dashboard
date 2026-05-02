@@ -3,7 +3,6 @@
 <head>
   <title>Mannam Video Dashboard</title>
 
-  <!-- Supabase CDN (ONLY ONCE!) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -14,30 +13,20 @@
       background: #f5f5f5;
     }
 
-    h1 {
-      font-size: 32px;
-    }
-
     .card {
-      background: white;
+      background: #ffffff;
       padding: 20px;
       margin: 20px auto;
       width: 300px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    .product {
-      text-align: left;
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-    }
   </style>
 </head>
 
 <body>
 
-  <h1>📊 Video Analytics</h1>
+  <h1>Video Analytics</h1>
 
   <div class="card">
     <h2>Total Plays</h2>
@@ -50,14 +39,13 @@
   </div>
 
   <script>
-    // YOUR SUPABASE CONFIG
-    const supabase = window.supabase.createClient(
+    const client = window.supabase.createClient(
       "https://mifwwaikvumjurgraslk.supabase.co",
       "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
     );
 
     async function loadData() {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from("video_clicks")
         .select("*");
 
@@ -66,30 +54,28 @@
         return;
       }
 
-      // Total plays
       document.getElementById("total").innerText = data.length;
 
-      // Count per product
       const counts = {};
 
-      data.forEach(row => {
+      data.forEach(function(row) {
         counts[row.product] = (counts[row.product] || 0) + 1;
       });
 
-      // Sort top products
       const sorted = Object.entries(counts)
-        .sort((a, b) => b[1] - a[1]);
+        .sort(function(a, b) { return b[1] - a[1]; });
 
-      // Display
       const container = document.getElementById("products");
       container.innerHTML = "";
 
-      sorted.forEach(([product, count]) => {
-        container.innerHTML += `
-          <div class="product">
-            ${product} → ${count} plays
-          </div>
-        `;
+      sorted.forEach(function(item) {
+        const product = item[0];
+        const count = item[1];
+
+        const div = document.createElement("div");
+        div.textContent = product + " -> " + count + " plays";
+
+        container.appendChild(div);
       });
     }
 
