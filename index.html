@@ -1,10 +1,12 @@
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
 <script>
   const { createClient } = supabase;
 
-const client = createClient(
-  "https://mifwwaikvumjurgraslk.supabase.co",
-  "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
-);
+  const client = createClient(
+    "https://mifwwaikvumjurgraslk.supabase.co",
+    "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
+  );
 
   async function loadData() {
     const { data, error } = await client
@@ -12,10 +14,9 @@ const client = createClient(
       .select("*");
 
     if (error) {
-  console.error("Supabase Error:", error);
-  alert(JSON.stringify(error));
-  return;
-}
+      console.error(error);
+      return;
+    }
 
     document.getElementById("total").innerText = data.length;
 
@@ -36,28 +37,21 @@ const client = createClient(
       }
     });
 
-    const sorted = Object.entries(grouped)
-      .sort(function(a, b) {
-        return b[1].count - a[1].count;
-      });
-
     const tbody = document.querySelector("#productsTable tbody");
     tbody.innerHTML = "";
 
-    sorted.forEach(function(item) {
+    Object.entries(grouped).forEach(function(item) {
       const product = item[0];
       const count = item[1].count;
       const date = new Date(item[1].lastDate).toLocaleString();
 
-      const row = `
+      tbody.innerHTML += `
         <tr>
           <td>${product}</td>
           <td>${count}</td>
           <td>${date}</td>
         </tr>
       `;
-
-      tbody.innerHTML += row;
     });
   }
 
