@@ -1,86 +1,62 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Mannam Video Dashboard</title>
+<script>
+  const client = window.supabase.createClient(
+    "https://mifwwaikvumjurgraslk.supabase.co/rest/v1/",
+    "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
+  );
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  async function loadData() {
+    const { data, error } = await client
+      .from("video_clicks")
+      .select("*");
 
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      padding: 40px;
-      background: #f5f5f5;
+    if (error) {
+      console.error(error);
+      return;
     }
 
-    .card {
-      background: #ffffff;
-      padding: 20px;
-      margin: 20px auto;
-      width: 300px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-  </style>
-</head>
+    document.getElementById("total").innerText = data.length;
 
-<body>
+    const grouped = {};
 
-  <h1>Video Analytics</h1>
-
-  <div class="card">
-    <h2>Total Plays</h2>
-    <h3 id="total">Loading...</h3>
-  </div>
-
-  <div class="card">
-    <h2>Top Products</h2>
-    <div id="products"></div>
-  </div>
-
-  <script>
-    const client = window.supabase.createClient(
-      "https://mifwwaikvumjurgraslk.supabase.co/rest/v1/",
-      "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
-    );
-
-    async function loadData() {
-      const { data, error } = await client
-        .from("video_clicks")
-        .select("*");
-
-      if (error) {
-        console.error(error);
-        return;
+    data.forEach(function(row) {
+      if (!grouped[row.product]) {
+        grouped[row.product] = {
+          count: 0,
+          lastDate: row.created_at
+        };
       }
 
-      document.getElementById("total").innerText = data.length;
+      grouped[row.product].count++;
 
-      const counts = {};
+      if (new Date(row.created_at) > new Date(grouped[row.product].lastDate)) {
+        grouped[row.product].lastDate = row.created_at;
+      }
+    });
 
-      data.forEach(function(row) {
-        counts[row.product] = (counts[row.product] || 0) + 1;
+    const sorted = Object.entries(grouped)
+      .sort(function(a, b) {
+        return b[1].count - a[1].count;
       });
 
-      const sorted = Object.entries(counts)
-        .sort(function(a, b) { return b[1] - a[1]; });
+    const tbody = document.querySelector("#productsTable tbody");
+    tbody.innerHTML = "";
 
-      const container = document.getElementById("products");
-      container.innerHTML = "";
+    sorted.forEach(function(item) {
+      const product = item[0];
+      const count = item[1].count;
+      const date = new Date(item[1].lastDate).toLocaleString();
 
-      sorted.forEach(function(item) {
-        const product = item[0];
-        const count = item[1];
+      const row = `
+        <tr>
+          <td>${product}</td>
+          <td>${count}</td>
+          <td>${date}</td>
+        </tr>
+      `;
 
-        const div = document.createElement("div");
-        div.textContent = product + " -> " + count + " plays";
+      tbody.innerHTML += row;
+    });
+  }
 
-        container.appendChild(div);
-      });
-    }
-
-    loadData();
-  </script>
-
-</body>
-</html>
+  loadData();
+</script>
