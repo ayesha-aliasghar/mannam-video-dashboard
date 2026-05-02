@@ -1,5 +1,51 @@
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<!DOCTYPE html> <html> <head> <title>Mannam Video Dashboard</title> <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <style> body { font-family: Arial; text-align: center; padding: 40px; background: #f5f5f5; } .card { background: #ffffff; padding: 20px; margin: 20px auto; width: 300px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); } </style> </head> <body> <h1>Video Analytics</h1> <div class="card"> <h2>Total Plays</h2> <h3 id="total">Loading...</h3> </div> <div class="card"> <h2>Top Products</h2> <table border="1" width="100%" id="productsTable"> <thead> <tr> <th>Product</th> <th>Play Count</th> <th>Last Played</th> </tr> </thead> <tbody></tbody> </table> </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mannam Video Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 20px;
+      margin: 20px auto;
+      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Video Analytics</h1>
+
+  <div class="card">
+    <h2>Total Plays</h2>
+    <h3 id="total">Loading...</h3>
+  </div>
+
+  <div class="card">
+  <h2>Top Products</h2>
+  <table border="1" width="100%" id="productsTable">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Play Count</th>
+        <th>Last Played</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 <script>
   const { createClient } = supabase;
 
