@@ -1,5 +1,7 @@
 <script>
-  const client = window.supabase.createClient(
+  const { createClient } = supabase;
+
+const client = createClient(
   "https://mifwwaikvumjurgraslk.supabase.co",
   "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
 );
