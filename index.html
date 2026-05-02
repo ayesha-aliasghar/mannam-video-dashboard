@@ -2,8 +2,9 @@
 <html>
 <head>
   <title>Mannam Video Dashboard</title>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
+  <!-- Correct CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     body {
@@ -17,9 +18,25 @@
       background: #ffffff;
       padding: 20px;
       margin: 20px auto;
-      width: 300px;
+      width: 600px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eee;
     }
   </style>
 </head>
@@ -34,72 +51,83 @@
   </div>
 
   <div class="card">
-  <h2>Top Products</h2>
-  <table border="1" width="100%" id="productsTable">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Play Count</th>
-        <th>Last Played</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-<script>
-  const { createClient } = supabase;
-
-  const client = createClient(
-    "https://mifwwaikvumjurgraslk.supabase.co/rest/v1/",
-    "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
-  );
-
-  async function loadData() {
-    const { data, error } = await client
-      .from("video_clicks")
-      .select("*");
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    document.getElementById("total").innerText = data.length;
-
-    const grouped = {};
-
-    data.forEach(function(row) {
-      if (!grouped[row.product]) {
-        grouped[row.product] = {
-          count: 0,
-          lastDate: row.created_at
-        };
-      }
-
-      grouped[row.product].count++;
-
-      if (new Date(row.created_at) > new Date(grouped[row.product].lastDate)) {
-        grouped[row.product].lastDate = row.created_at;
-      }
-    });
-
-    const tbody = document.querySelector("#productsTable tbody");
-    tbody.innerHTML = "";
-
-    Object.entries(grouped).forEach(function(item) {
-      const product = item[0];
-      const count = item[1].count;
-      const date = new Date(item[1].lastDate).toLocaleString();
-
-      tbody.innerHTML += `
+    <h2>Top Products</h2>
+    <table id="productsTable">
+      <thead>
         <tr>
+          <th>Product</th>
+          <th>Play Count</th>
+          <th>Last Played</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const { createClient } = supabase;
+
+    const client = createClient(
+      "https://mifwwaikvumjurgraslk.supabase.co",
+      "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
+    );
+
+    async function loadData() {
+      const { data, error } = await client
+        .from("video_clicks")
+        .select("*");
+
+      if (error) {
+        console.error("Supabase error:", error);
+        return;
+      }
+
+      document.getElementById("total").innerText = data.length;
+
+      const grouped = {};
+
+      data.forEach(function(row) {
+        if (!grouped[row.product]) {
+          grouped[row.product] = {
+            count: 0,
+            lastDate: row.created_at
+          };
+        }
+
+        grouped[row.product].count++;
+
+        if (new Date(row.created_at) > new Date(grouped[row.product].lastDate)) {
+          grouped[row.product].lastDate = row.created_at;
+        }
+      });
+
+      const sorted = Object.entries(grouped)
+        .sort(function(a, b) {
+          return b[1].count - a[1].count;
+        });
+
+      const tbody = document.querySelector("#productsTable tbody");
+      tbody.innerHTML = "";
+
+      sorted.forEach(function(item) {
+        const product = item[0];
+        const count = item[1].count;
+        const date = new Date(item[1].lastDate).toLocaleString();
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
           <td>${product}</td>
           <td>${count}</td>
           <td>${date}</td>
-        </tr>
-      `;
-    });
-  }
+        `;
 
-  loadData();
-</script>
+        tbody.appendChild(tr);
+      });
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
