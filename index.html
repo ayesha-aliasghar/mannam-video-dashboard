@@ -1,25 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Video Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mannam Video Dashboard</title>
 
+  <!-- Supabase CDN (ONLY ONCE!) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin: 20px auto;
+      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .product {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
 </head>
 
-<body style="font-family: Arial; padding: 15px; max-width: 500px; margin: auto;">
+<body>
 
-  <h2>📊 Video Analytics</h2>
+  <h1>📊 Video Analytics</h1>
 
-  <h3>Total Plays: <span id="total">0</span></h3>
+  <div class="card">
+    <h2>Total Plays</h2>
+    <h3 id="total">Loading...</h3>
+  </div>
 
-  <h3>Top Products</h3>
-  <ul id="products"></ul>
-
-  <canvas id="chart"></canvas>
+  <div class="card">
+    <h2>Top Products</h2>
+    <div id="products"></div>
+  </div>
 
   <script>
+    // YOUR SUPABASE CONFIG
     const supabase = window.supabase.createClient(
       "https://mifwwaikvumjurgraslk.supabase.co",
       "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
@@ -27,42 +58,38 @@
 
     async function loadData() {
       const { data, error } = await supabase
-        .from('video_clicks')
-        .select('*');
-      console.log("DATA:", data);
-      console.log("ERROR:", error);
+        .from("video_clicks")
+        .select("*");
 
-      document.getElementById('total').innerText = data.length;
+      if (error) {
+        console.error(error);
+        return;
+      }
 
+      // Total plays
+      document.getElementById("total").innerText = data.length;
+
+      // Count per product
       const counts = {};
+
       data.forEach(row => {
         counts[row.product] = (counts[row.product] || 0) + 1;
       });
 
-      const list = document.getElementById('products');
-      list.innerHTML = '';
+      // Sort top products
+      const sorted = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1]);
 
-      Object.entries(counts).forEach(([p,c]) => {
-        const li = document.createElement('li');
-        li.textContent = `${p} → ${c}`;
-        list.appendChild(li);
-      });
+      // Display
+      const container = document.getElementById("products");
+      container.innerHTML = "";
 
-      const daily = {};
-      data.forEach(row => {
-        const d = new Date(row.created_at).toISOString().split('T')[0];
-        daily[d] = (daily[d] || 0) + 1;
-      });
-
-      new Chart(document.getElementById('chart'), {
-        type: 'line',
-        data: {
-          labels: Object.keys(daily),
-          datasets: [{
-            label: 'Daily Plays',
-            data: Object.values(daily)
-          }]
-        }
+      sorted.forEach(([product, count]) => {
+        container.innerHTML += `
+          <div class="product">
+            ${product} → ${count} plays
+          </div>
+        `;
       });
     }
 
