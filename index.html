@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body style="font-family: Arial; padding: 15px; max-width: 500px; margin: auto;">
+
+  <h2>📊 Video Analytics</h2>
+
+  <h3>Total Plays: <span id="total">0</span></h3>
+
+  <h3>Top Products</h3>
+  <ul id="products"></ul>
+
+  <canvas id="chart"></canvas>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://mifwwaikvumjurgraslk.supabase.co",
+      "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
+    );
+
+    async function loadData() {
+      const { data } = await supabase.from('video_clicks').select('*');
+
+      document.getElementById('total').innerText = data.length;
+
+      const counts = {};
+      data.forEach(row => {
+        counts[row.product] = (counts[row.product] || 0) + 1;
+      });
+
+      const list = document.getElementById('products');
+      list.innerHTML = '';
+
+      Object.entries(counts).forEach(([p,c]) => {
+        const li = document.createElement('li');
+        li.textContent = `${p} → ${c}`;
+        list.appendChild(li);
+      });
+
+      const daily = {};
+      data.forEach(row => {
+        const d = new Date(row.created_at).toISOString().split('T')[0];
+        daily[d] = (daily[d] || 0) + 1;
+      });
+
+      new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels: Object.keys(daily),
+          datasets: [{
+            label: 'Daily Plays',
+            data: Object.values(daily)
+          }]
+        }
+      });
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
