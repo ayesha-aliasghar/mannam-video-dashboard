@@ -1,8 +1,5 @@
 <script>
-  const client = window.supabase.createClient(
-    "https://mifwwaikvumjurgraslk.supabase.co/rest/v1/",
-    "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B"
-  );
+  const client = window.supabase.createClient( "https://mifwwaikvumjurgraslk.supabase.co/rest/v1/", "sb_publishable_MGFP0zVIAuJVfwfCAgPQ_A_WI82lx_B" );
 
   async function loadData() {
     const { data, error } = await client
